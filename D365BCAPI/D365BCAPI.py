@@ -33,16 +33,19 @@ class Connect(object):
         self._etag = str()  # for internal usage
         self.except_error = None  # stores connection or other not BC error
 
-    def read(self):
+    def read(self, filter_text=None):
         """
-        reads records according filters. Set object.filter_text = ... before run read
+        reads records according filters;
         endpoint url can be changed before call
-        :param :
+        :param : filter_text - API specific filter text (https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-connect-apps-filtering)
         :return: if sucess (200) - value list which includes record's fields dictionary (dictionaries in list),
                  or blank list if no records in response (wrong filters) and except_error = None
                  or blank list if connection error (except_error - has error text)
                  or blank list if connected but failed in BC - except_error has [responds status code, responds message]
         """
+        if not filter_text:  # set filter_text from parameter if it was used
+            self.filter_text = filter_text
+
         if len(self.filter_text) > 0:
             _filter = "$filter=" + self.filter_text
         else:
