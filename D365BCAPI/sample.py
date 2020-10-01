@@ -1,4 +1,4 @@
-from D365BCAPI import Connect
+from D365BCAPI.D365BCAPI import Connect
 
 """
 This is sample usage of BusCentralAPI. Used standard Busines Central API pages.
