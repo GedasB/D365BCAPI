@@ -1,13 +1,15 @@
 from D365BCAPI.D365BCAPI import Connect
 
 """
-This is sample usage of BusCentralAPI. Used standard Busines Central API pages.
-flow is:
+This is sample usage of D365BCAPI. Used standard Dynamics 365 Business Central objects API pages.
+Existing API pages can be get http://{server}:{port}/{tenant}/api/beta/
+metadata can be get http://{server}:{port}/{tenant}/api/beta/$metadata
+Flow is:
 1. Looking for customer name starting by "Cronus". If do not exists - create. "Recordset read & record create" example
 2. Looking for items '1996-S' '2000-S' and g/l account '2340'. Get it id - requires for sales order creation.
- "Get field value example"
+ "Get field value" example
 3. Create sales order with 4 lines: 2 item lines, g/l account line, comment line. Get created sales order documentid.
-  Few related records creation example 
+  Few related "records creation" example 
 4. Add 2 more lines to the existing order. "Add lines to existing order" example.
 5. Modify description in comment line in existing order. "Modify existing line" example
 6. Delete one line from existing order. "Record delete" example
@@ -19,7 +21,8 @@ user = psw = "a"  # basic authentication
 url_customers = "http://navbs:7048/BC/api/beta/customers"  # page 5471
 custname = 'Cronus'  # begining of customer name
 
-customers = Connect(url_customers, (user, psw), {"Accept-Language": "en-us"})  # create connection object
+# create connection object: url, basic authentication, headers recommended by MS
+customers = Connect(url_customers, (user, psw), {"Accept-Language": "en-us"})
 # we can only find customer by begin of name
 customers.filter_text = f"displayName ge '{custname}' and displayName le '{custname}Z'"
 # filter is: where displayName is greater or equal to Cronus and less or equal CronusZ
@@ -27,7 +30,7 @@ response_list = customers.read()  # read filtered customers
 print("Read customers", response_list[0].get("displayName"))  # 1st customer name
 
 if not customers.except_error:
-    raise AssertionError(customers.except_error)
+    raise Exception(customers.except_error)
 
 if len(response_list) > 0:  # customer exists
     custno = response_list[0].get("number")  # if customer exists then get it No.
@@ -53,7 +56,6 @@ else:  # create customer if not found
     response_list = customers.insert(new_customer)  # new customer is created
 
 print("Sales order Customer No", custno)
-# print(customers.except_error)
 
 # find item and itemId - it requires for sales document lines creation
 url_item = "http://navbs:7048/BC/api/beta/items"  # page 5470
@@ -66,7 +68,6 @@ if len(item_response) > 0:  # item exists
     item_1_id = item_response[0].get("id")  # get item1 id
 
 item.filter_text = "number eq '2000-S'"  # change filter and call for another item
-# item2 = BusCentralAPI.Connect(url_item, user, psw, flt_item2)
 item_response = item.read()
 item_2_id = None
 if len(item_response) > 0:  # customer exists
@@ -76,7 +77,7 @@ if len(item_response) > 0:  # customer exists
 url_account = "http://navbs:7048/BC/api/beta/accounts"  # page 5470
 
 account = Connect(url_account, (user, psw), {"Accept-Language": "en-us"})
-account.filter_text = "number eq '2340'"  # general ledger account no is 2340
+account.filter_text = "number eq '2340'"  # g/l account no is 2340
 account_response = account.read()
 account_id = None
 if len(account_response) > 0:  # item exists
@@ -90,7 +91,7 @@ ext_doc_no = "FDA 17596"  # Only by external document no we can find sales order
 new_order = {
     "externalDocumentNumber": ext_doc_no,  # this is number we'll search created document and get it No.
     "orderDate": "2020-02-06",  # limited by CRONUS demo license date range
-    "customerNumber": custno,  # customer nnumber taken/created in previous step
+    "customerNumber": custno,  # customer number taken/created in previous step
     "currencyCode": "EUR",
     "pricesIncludeTax": False,
     "salesperson": "PS",
@@ -126,7 +127,7 @@ new_order = {
             "description": "This is Comments line"
         },
         {
-            "sequence": "40000",  # 5th line g/l account
+            "sequence": "40000",  # 4th line g/l account
             "lineType": "Account",
             "account_id": account_id,  # mandatory account id
             "quantity": 1.0,
@@ -154,11 +155,11 @@ else:  # no order with specified external document No. exists
 print("SO No", so_number)
 
 # exiting order lines management
-# we need sales order id to add it to endpoint url for record editing
+# we need sales order document_id to add it to endpoint url for record editing
 if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
     url_sol = f"http://navbs:7048/BC/api/beta/salesOrders({so_id})/salesOrderLines"
 else:
-    raise Exception()
+    raise Exception('Critical error - Can not find document')
 
 sol = Connect(url_sol, (user, psw), {"Accept-Language": "en-us"})  # new connection to lines
 response_list = sol.read()  # read all lines just for fun
@@ -189,7 +190,7 @@ print("Added line 37500: Item - '2000-S'", response_list)
 # count lines
 sol.url = url_sol = f"http://navbs:7048/BC/api/beta/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
-print(f"SO has {len(response_list)} lines after add 2")  # number of lines in the document
+print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
 
 # modify exiting line: it is line no 30000
 line_update = {"description": "This is updated Comments line"}  # new info to update line
@@ -211,4 +212,4 @@ print("Deleted fake line 37500", response_list)
 # count lines
 sol.url = f"http://navbs:7048/BC/api/beta/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
-print(f"SO has {len(response_list)} lines after delete one")  # number of lines in the document
+print(f"SO has {len(response_list)} lines after deleted one")  # number of lines in the document

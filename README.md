@@ -11,6 +11,10 @@ Connection endpoint rules are described [here](https://docs.microsoft.com/en-us/
 
 Filters rules for API endpoint are described [here](https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-connect-apps-filtering) 
 
+Existing API pages can be get http://{server}:{port}/{tenant}/api/beta/;
+ metadata can be get http://{server}:{port}/{tenant}/api/beta/$metadata;
+ sample metadata.xml file included in project
+
 Connector uses python *request* module
 ##Connector Flow
 1. Create connector *object = connect(url,url, auth, headers)*
@@ -21,9 +25,9 @@ Connector uses python *request* module
 2. Read data from database by execute *object.read(filter)*. 
     * filter is text according [API rules](https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-connect-apps-filtering). Filter can be set
     by execute *object.filter_text = new_filter*. Filter can be not used if record Id is used for example url to specific sales order is
-    http://navbs:7048/BC/api/beta/salesOrders(document_Id) 
+    http://../salesOrders(0736183a-f8c8-ea11-9954-ff17e652b3c3) 
     * URL can be modified before read by execute *object.url = new_url*. In some cases must be specific url used. 
-    For example read sales order lines need to be document_id included in url like: http://navbs:7048/BC/api/beta/salesOrders(document_id)/salesOrderLines
+    For example read sales order lines need to be document_id included in url like: http://../salesOrders(0736183a-f8c8-ea11-9954-ff17e652b3c3)/salesOrderLines
     * response is list of dictionaries of records.
     * if response is blank then maybe filter has no records but check *object.except_error* value
         * it could be connection error message (for example: wrong url, time out etc.)
@@ -34,21 +38,21 @@ Connector uses python *request* module
     are not required for these fields.
     * URL can be modified before call by execute *object.url = new_url*. In some cases url must be specific for this operation. 
     For example: if need to create Sales Order Line when sales order already created then url must to include document_id like
-    http://navbs:7048/BC/api/beta/salesOrders(document_id)/salesOrderLines   
-    * response is API response to action. If record created then response is tuple (201, Created). 
+    http://../salesOrders(0736183a-f8c8-ea11-9954-ff17e652b3c3)/salesOrderLines   
+    * response is API response to action. If record created then response is list [201, Created]. 
     if response is blank then check *object.except_error* value
 4. Modify (update) new record in database by execute *object.modify(json)*
     * json must to include all fields need to be modified.
     * URL can be modified before call by execute *object.url = new_url*. In some cases url must be specific for this operation. 
     For example: if need to modify sales order line (subpage of sales order header) then url must to include document_id and line number like
-    http://navbs:7048/BC/api/beta/salesOrderLines({so_id},{line_no})"   
-    * response is API response to action. If record created then response is tuple (200, OK). 
+    http://../salesOrderLines(0736183a-f8c8-ea11-9954-ff17e652b3c3,30000)   
+    * response is API response to action. If record created then response is list [200, OK]. 
     if response is blank then check *object.except_error* value
 5. Delete record need to execute *object.delete()*
-    * url must to include document_id for "normal record" like customer, item etc. like http://navbs:7048/BC/api/beta/salesOrders(document_id)
+    * url must to include document_id for "normal record" like customer, item etc. like http://../salesOrders(document_id)
      if record has relation to upper table like sales line then url must to include document_id and line_no like:
-     http://navbs:7048/BC/api/beta/salesOrderLines(document_id,line_no)
-    * response is API response to action. If record deleted then response is tuple (204, No Content). 
+     http://../salesOrderLines(0736183a-f8c8-ea11-9954-ff17e652b3c3,20000)
+    * response is API response to action. If record deleted then response is list [204, No Content]. 
     if response is blank then check *object.except_error* value           
 
 API structure can be analysed by execute $metadata url like http://navbs:7048/BC/api/beta/$metadata
