@@ -46,7 +46,7 @@ class Connect(object):
                  or blank list if connection error (except_error - has error text)
                  or blank list if connected but failed in BC - except_error has [responds status code, responds message]
         """
-        if filter_text != None:  # set filter_text from parameter if it was used
+        if filter_text is not None:  # set filter_text from parameter if it was used
             self.filter_text = filter_text
 
         if len(self.filter_text) > 0:
