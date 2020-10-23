@@ -1,4 +1,5 @@
-from D365BCAPI.D365BCAPI import Connect
+
+from D365BCAPI.D365BCAPIC import Connect
 
 """
 This is sample usage of D365BCAPI. Used standard Dynamics 365 Business Central objects API pages.
@@ -27,9 +28,10 @@ customers = Connect(url_customers, (user, psw), {"Accept-Language": "en-us"})
 customers.filter_text = f"displayName ge '{custname}' and displayName le '{custname}Z'"
 # filter is: where displayName is greater or equal to Cronus and less or equal CronusZ
 response_list = customers.read()  # read filtered customers
-print("Read customers", response_list[0].get("displayName"))  # 1st customer name
+if len(response_list) > 0:
+    print("Read customers", response_list[0].get("displayName"))  # 1st customer name
 
-if not customers.except_error:
+if customers.except_error != None:
     raise Exception(customers.except_error)
 
 if len(response_list) > 0:  # customer exists
