@@ -1,8 +1,8 @@
 
-from D365BCAPI.D365BCAPIC import Connect
+from D365BCAPI.D365BC16API import Connect
 
 """
-This is sample usage of D365BCAPI. Used standard Dynamics 365 Business Central objects API pages.
+This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx objects API pages.
 Existing API pages can be get http://{server}:{port}/{tenant}/api/v1.0/
 metadata can be get http://{server}:{port}/{tenant}/api/v1.0/$metadata
 Flow is:
@@ -19,7 +19,7 @@ Flow is:
 user = psw = "a"  # basic authentication
 
 # customers
-url_customers = "http://navbs:7048/BC/api/v1.0/customers"  # page 5471
+url_customers = "http://bs16:7048/BC/api/v1.0/customers"  # page 5471
 custname = 'Cronus'  # begining of customer name
 
 # create connection object: url, basic authentication, headers recommended by MS
@@ -60,7 +60,7 @@ else:  # create customer if not found
 print("Sales order Customer No", custno)
 
 # find item and itemId - it requires for sales document lines creation
-url_item = "http://navbs:7048/BC/api/v1.0/items"  # page 5470
+url_item = "http://bs16:7048/BC/api/v1.0/items"  # page 5470
 
 item = Connect(url_item, (user, psw), {"Accept-Language": "en-us"})
 item.filter_text = "number eq '1996-S'"
@@ -76,7 +76,7 @@ if len(item_response) > 0:  # customer exists
     item_2_id = item_response[0].get("id")  # get item2 id
 
 # find g/l account and itemId - it requires for sales document lines
-url_account = "http://navbs:7048/BC/api/v1.0/accounts"  # page 5470
+url_account = "http://bs16:7048/BC/api/v1.0/accounts"  # page 5470
 
 account = Connect(url_account, (user, psw), {"Accept-Language": "en-us"})
 account.filter_text = "number eq '2340'"  # g/l account no is 2340
@@ -138,7 +138,7 @@ new_order = {
     ]
 }
 
-url_so = "http://navbs:7048/BC/api/v1.0/salesOrders"  # NAV page 5495
+url_so = "http://bs16:7048/BC/api/v1.0/salesOrders"  # NAV page 5495
 so = Connect(url_so, (user, psw), {"Accept-Language": "en-us"})  # create sales order header object
 so.filter_text = f"externalDocumentNumber eq '{ext_doc_no}'"
 response_list = so.read()  # looking for Sales Order with known external doc no
@@ -159,7 +159,7 @@ print("SO No", so_number)
 # exiting order lines management
 # we need sales order document_id to add it to endpoint url for record editing
 if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
-    url_sol = f"http://navbs:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+    url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 else:
     raise Exception('Critical error - Can not find document')
 
@@ -190,7 +190,7 @@ response_list = sol.insert(line_insert)  # insert fake line
 print("Added line 37500: Item - '2000-S'", response_list)
 
 # count lines
-sol.url = url_sol = f"http://navbs:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
 print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
 
@@ -198,7 +198,7 @@ print(f"SO has {len(response_list)} lines after added 2")  # number of lines in 
 line_update = {"description": "This is updated Comments line"}  # new info to update line
 line_no = 30000  # line No (sequence in response json)
 # order line url includes document id and line no (line primary key)
-sol.url = f"http://navbs:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.read()
 print("description before update is", response_list[0].get("description"))
 response_list = sol.modify(line_update)  # update line in parameters new info dic
@@ -207,11 +207,11 @@ print("Modified line 30000 description now is 'This is updated Comments line'", 
 # delete line
 line_no = 37500  # line No (sequence in response json)
 # order line url includes document id and line no (line primary key)
-sol.url = f"http://navbs:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.delete()  # update line in parameters new info dic
 print("Deleted fake line 37500", response_list)
 
 # count lines
-sol.url = f"http://navbs:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
 print(f"SO has {len(response_list)} lines after deleted one")  # number of lines in the document

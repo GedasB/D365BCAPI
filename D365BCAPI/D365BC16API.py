@@ -1,6 +1,6 @@
 """
-This connector simplifies http connection from Python to Microsoft Dynamics 365 Business Central API by providing
-4 methods: insert, read, modify, delete (CRUD)
+This connector simplifies http connection from Python to Microsoft Dynamics 365 Business Central platform 16.xx API
+by providing 4 methods: insert, read, modify, delete (CRUD)
 ___________________
 Dynamics 365 Business Central API documentation:
 https://docs.microsoft.com/en-us/dynamics-nav/api-reference/v1.0/
