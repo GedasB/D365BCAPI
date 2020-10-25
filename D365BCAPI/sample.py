@@ -79,7 +79,7 @@ if len(item_response) > 0:  # customer exists
 url_account = "http://bs16:7048/BC/api/v1.0/accounts"  # page 5470
 
 account = Connect(url_account, (user, psw), {"Accept-Language": "en-us"})
-account.filter_text = "number eq '2340'"  # g/l account no is 2340
+account.filter_text = "number eq '6610'"  # g/l account no is 6610
 account_response = account.read()
 account_id = None
 if len(account_response) > 0:  # item exists
@@ -87,7 +87,10 @@ if len(account_response) > 0:  # item exists
 
 # create sales order
 
-# new order dictionary NAV page 5495 and lines NAV page 5495
+# new order dictionary NAV page 5495 and lines NAV page 5496
+# be carefull with fields names, always check with metadata
+# fields are changing from build to build from version to version
+# some fields are changing characters upper>low>upper
 ext_doc_no = "FDA 17596"  # Only by external document no we can find sales order,
 # as for document no is used No. Series
 new_order = {
@@ -101,17 +104,19 @@ new_order = {
     "status": "Draft",
     "phoneNumber": "370 698 13123",
     "email": "liber.town@contoso.com",
-    "billingPostalAddress": {  # this is not required, but as sample of "Microsoft.NAV.postalAddressType" dictionary
-        "street": "Paco str. 2",
-        "city": "Vilnius",
+    "shippingPostalAddress": { # Changing shipping address just for fun
+        "street": "Another Str. 77",
+        "city": "Hamburg",
         "state": "",
-        "countryLetterCode": "LT",
-        "postalCode": "LT25126"
+        "countryLetterCode": "DE",
+        "postalCode": "DE-20097"
     },
     "salesOrderLines": [  # Navigation property to "Collection(Microsoft.NAV.salesOrderLine)"
         {
             "sequence": "10000",  # mandatory line number
-            "lineType": "Item",  # line type (Comment, Accounts, Item)
+            "lineType": "Item",
+            # line type (Comment, Accounts, Item, Resource, Fixed Asset, Charge) can be found at table 5476 >
+            # field(9029; "API Type"; Enum "Invoice Line Agg. Line Type")
             "itemId": item_1_id,  # mandatory item_Id (or blank if account_id is used)
             "description": "Customized item description in line",
             "quantity": 2.0,
@@ -131,7 +136,7 @@ new_order = {
         {
             "sequence": "40000",  # 4th line g/l account
             "lineType": "Account",
-            "account_id": account_id,  # mandatory account id
+            "accountId": account_id,  # mandatory account id
             "quantity": 1.0,
             "unitPrice": 100
         }
@@ -145,18 +150,22 @@ response_list = so.read()  # looking for Sales Order with known external doc no
 
 if len(response_list) > 0:  # order exists and we take order id
     so_number = response_list[0].get("number")  # get order No. just for fun
-    so_id = response_list[0].get("id")
+    so_id = response_list[0].get("id") # SO id we need later for lines edit
 else:  # no order with specified external document No. exists
     response_list = so.insert(new_order)  # create new order with specified external doc no
-    print("Sales order is created", response_list)  # [201, 'Created'] if everything is OK
+    if (len(response_list) > 0) and so.except_error is None :
+        print("Sales order is created", response_list)  # [201, 'Created'] if everything is OK
+    else:
+        raise Exception(so.except_error)
+
     so.filter_text = f"externalDocumentNumber eq '{ext_doc_no}'"
     response_list = so.read()  # looking for Sales Order with known external doc no
     if len(response_list) > 0:
         so_number = response_list[0].get("number")  # get just created order No.
-        so_id = response_list[0].get("id")
+        so_id = response_list[0].get("id") # SO id we need later for lines edit
 print("SO No", so_number)
 
-# exiting order lines management
+# created order lines management
 # we need sales order document_id to add it to endpoint url for record editing
 if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
     url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
@@ -165,7 +174,10 @@ else:
 
 sol = Connect(url_sol, (user, psw), {"Accept-Language": "en-us"})  # new connection to lines
 response_list = sol.read()  # read all lines just for fun
-print(f"SO has {len(response_list)} lines")  # number of lines in the document
+if (len(response_list) > 0) and sol.except_error is None:
+    print(f"SO has {len(response_list)} lines")  # number of lines in the document
+else:
+    raise Exception(sol.except_error)
 
 # add new line in order
 line_no = 35000  # line No or sequence
@@ -177,7 +189,10 @@ line_insert = {
     "quantity": 3.0
 }
 response_list = sol.insert(line_insert)  # insert line
-print("Added line 35000: Item - 1996-S", response_list)
+if (len(response_list) > 0) and sol.except_error is None:
+    print("Added line 35000: Item - 1996-S", response_list) # [201, 'Created'] if everything is OK
+else:
+    raise Exception(sol.except_error)
 
 # add one more line and later delete it
 line_insert = {
@@ -187,29 +202,73 @@ line_insert = {
     "quantity": 1.0
 }
 response_list = sol.insert(line_insert)  # insert fake line
-print("Added line 37500: Item - '2000-S'", response_list)
+if (len(response_list) > 0) and sol.except_error is None:
+    print("Added line 37500: Item - '2000-S'", response_list) # [201, 'Created'] if everything is OK
+else:
+    raise Exception(sol.except_error)
 
 # count lines
-sol.url = url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
-print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
+if (len(response_list) > 0) and sol.except_error is None:
+    print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
+else:
+    raise Exception(sol.except_error)
+
+line_no = 30000
+sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 30000
+
+response_list = sol.read()  # get line from document line No is 30000
+if (len(response_list) > 0) and sol.except_error is None:
+    print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
+else:
+    raise Exception(sol.except_error)
+
+line_id = response_list[0].get('id')
 
 # modify exiting line: it is line no 30000
 line_update = {"description": "This is updated Comments line"}  # new info to update line
-line_no = 30000  # line No (sequence in response json)
-# order line url includes document id and line no (line primary key)
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"
+sol.filter_text = ''
+#sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.read()
-print("description before update is", response_list[0].get("description"))
+if (len(response_list) > 0) and sol.except_error is None:
+    print("description before update is", response_list[0].get("description"))
+else:
+    raise Exception(sol.except_error)
 response_list = sol.modify(line_update)  # update line in parameters new info dic
-print("Modified line 30000 description now is 'This is updated Comments line'", response_list)
+if (len(response_list) > 0) and sol.except_error is None:
+    print("Modified line 30000 description now is 'This is updated Comments line'", response_list)
+else:
+    raise Exception(sol.except_error)
 
 # delete line
 line_no = 37500  # line No (sequence in response json)
-# order line url includes document id and line no (line primary key)
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+# in API beta order line url includes document id and line no (line primary key)
+# sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+##
+# in API v1.0 we need to find sales line id and identify it by id
+# we looking for line with sequence 3750
+
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 37500
+
+response_list = sol.read()  # get line with filtered sequence 37500
+if (len(response_list) > 0) and sol.except_error is None:
+    print(f"We want to delete line 3750 {response_list}")  # number of lines in the document
+else:
+    raise Exception(sol.except_error)
+
+line_id = response_list[0].get('id')
+
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"
+sol.filter_text = '' #  remove any filters
 response_list = sol.delete()  # update line in parameters new info dic
-print("Deleted fake line 37500", response_list)
+if (len(response_list) > 0) and sol.except_error is None:
+    print("Deleted fake line 37500", response_list)
+else:
+    raise Exception(sol.except_error)
 
 # count lines
 sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"

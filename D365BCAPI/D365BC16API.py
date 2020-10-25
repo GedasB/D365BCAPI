@@ -48,11 +48,14 @@ class Connect(object):
         """
         if filter_text is not None:  # set filter_text from parameter if it was used
             self.filter_text = filter_text
-
-        if len(self.filter_text) > 0:
-            _filter = "$filter=" + self.filter_text
         else:
             _filter = None
+
+        if self.filter_text is not None:
+            if len(self.filter_text) > 0:
+                _filter = "$filter=" + self.filter_text
+            else:
+                _filter = None
 
         try:
             # response = requests.get(self.url + __filter_url, auth=self._auth, headers=self._headers)
