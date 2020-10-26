@@ -13,6 +13,9 @@ https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/develope
 
 Dynamics 365 Business Central API filters creation like "number eq '20000'"
 https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-connect-apps-filtering
+
+Dynamics 365 Business Central API tips
+https://docs.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-connect-apps-tips
 ___________________
 """
 
@@ -68,6 +71,7 @@ class Connect(object):
             self.except_error = [response.status_code, response.reason]
             return []
 
+        self.filter_text = None  # remove filter after call
         response_dict = response.json()  # dict
 
         value_list = response_dict.get("value")  # list return

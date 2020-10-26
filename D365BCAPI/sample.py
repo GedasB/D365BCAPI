@@ -2,7 +2,7 @@
 from D365BCAPI.D365BC16API import Connect
 
 """
-This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx objects API pages.
+This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects API v1.0 pages.
 Existing API pages can be get http://{server}:{port}/{tenant}/api/v1.0/
 metadata can be get http://{server}:{port}/{tenant}/api/v1.0/$metadata
 Flow is:
@@ -88,9 +88,6 @@ if len(account_response) > 0:  # item exists
 # create sales order
 
 # new order dictionary NAV page 5495 and lines NAV page 5496
-# be carefull with fields names, always check with metadata
-# fields are changing from build to build from version to version
-# some fields are changing characters upper>low>upper
 ext_doc_no = "FDA 17596"  # Only by external document no we can find sales order,
 # as for document no is used No. Series
 new_order = {
@@ -149,7 +146,7 @@ so.filter_text = f"externalDocumentNumber eq '{ext_doc_no}'"
 response_list = so.read()  # looking for Sales Order with known external doc no
 
 if len(response_list) > 0:  # order exists and we take order id
-    so_number = response_list[0].get("number")  # get order No. just for fun
+    so_number = response_list[0].get("number")  # get order No. just for fun - it is not used in further actions
     so_id = response_list[0].get("id") # SO id we need later for lines edit
 else:  # no order with specified external document No. exists
     response_list = so.insert(new_order)  # create new order with specified external doc no
@@ -173,7 +170,7 @@ else:
     raise Exception('Critical error - Can not find document')
 
 sol = Connect(url_sol, (user, psw), {"Accept-Language": "en-us"})  # new connection to lines
-response_list = sol.read()  # read all lines just for fun
+response_list = sol.read()  # read all lines just for fun as we need only few lines for editing
 if (len(response_list) > 0) and sol.except_error is None:
     print(f"SO has {len(response_list)} lines")  # number of lines in the document
 else:
@@ -215,28 +212,24 @@ if (len(response_list) > 0) and sol.except_error is None:
 else:
     raise Exception(sol.except_error)
 
+#  for line editing we need to have line id, find it by search line with line no 30000
 line_no = 30000
 sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 30000
 
-response_list = sol.read()  # get line from document line No is 30000
+response_list = sol.read()  # get line from document; line No is 30000
 if (len(response_list) > 0) and sol.except_error is None:
-    print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
-else:
-    raise Exception(sol.except_error)
-
-line_id = response_list[0].get('id')
-
-# modify exiting line: it is line no 30000
-line_update = {"description": "This is updated Comments line"}  # new info to update line
-
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"
-sol.filter_text = ''
-#sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
-response_list = sol.read()
-if (len(response_list) > 0) and sol.except_error is None:
+    line_id = response_list[0].get('id') #  get line id
+    print(f"Line id is {line_id}")
     print("description before update is", response_list[0].get("description"))
 else:
     raise Exception(sol.except_error)
+
+# modify exiting line: it is line no 30000
+line_update = {"description": "This is updated Comments line"}  # new info to update line
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')" #  adding line_id to url
+sol.filter_text = ''
+#  for beta api document key was document id and sequence
+#sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.modify(line_update)  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
     print("Modified line 30000 description now is 'This is updated Comments line'", response_list)
@@ -249,20 +242,19 @@ line_no = 37500  # line No (sequence in response json)
 # sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 ##
 # in API v1.0 we need to find sales line id and identify it by id
-# we looking for line with sequence 3750
+# we looking for line with sequence 37500
 
 sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 37500
 
 response_list = sol.read()  # get line with filtered sequence 37500
 if (len(response_list) > 0) and sol.except_error is None:
-    print(f"We want to delete line 3750 {response_list}")  # number of lines in the document
+    line_id = response_list[0].get('id')
+    print(f"Line 3750 id is  {line_id}")
 else:
     raise Exception(sol.except_error)
 
-line_id = response_list[0].get('id')
-
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')" #  adding line_id to URL
 sol.filter_text = '' #  remove any filters
 response_list = sol.delete()  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
