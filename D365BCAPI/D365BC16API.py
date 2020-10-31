@@ -1,7 +1,6 @@
 """
 This connector simplifies http connection from Python to Microsoft Dynamics 365 Business Central platform 16.xx API
-by providing 4 methods: insert, read, modify, delete (CRUD)
-___________________
+by providing 5 methods: insert, read, modify, delete (CRUD) and exe for action execution___________________
 Dynamics 365 Business Central API documentation:
 https://docs.microsoft.com/en-us/dynamics-nav/api-reference/v1.0/
 
@@ -36,7 +35,7 @@ class Connect(object):
         self._headers = headers
         self.filter_text = str()  # filter_text can be modified by calling object.filter_text = new_filter
         self._etag = str()  # for internal usage
-        self.except_error = None  # stores connection or other not BC error
+        self.except_error = None  # stores connection or other error
 
     def read(self, filter_text=None):
         """
@@ -92,9 +91,9 @@ class Connect(object):
         automatically in BC (for example by using number series, or relations). For example sales order no. is taken
         from number series so no needs to specify in json. Sales line document no is taken from sales header and
         no need to be specified.
-        endpoint url can be changed before insert
+        endpoint url can be changed before insert;
         :param: json_body: dictionary(json) with primary key fields and values (mandatory)
-                and other fields and values
+                and other fields and values;
         :return: list [201, Created] means record is created. otherwise look for error
         """
 
@@ -109,6 +108,26 @@ class Connect(object):
             return []
 
         return [response.status_code, response.reason]  # 201 - Created
+
+    def exe(self, json_body):
+        """
+        executes action set in URL;
+        endpoint url can be changed before insert;
+        :param: json_body: dictionary(json) includes required parameters. it could be blank
+        :return:
+        """
+        response = self.read()  # just to get etag value
+        if self.except_error:  # failed read connection
+            return [self.except_error]
+
+        if len(response) == 0 or self._etag == "":  # read response found no records to update
+            return []
+
+        self._headers["If-Match"] = self._etag
+
+        response = requests.post(self.url, auth=self._auth, headers=self._headers, json=json_body)
+
+        return [response.status_code, response.reason]  # [204, No Content] is OK
 
     def modify(self, json_body):
         """

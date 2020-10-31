@@ -83,7 +83,7 @@ account.filter_text = "number eq '6610'"  # g/l account no is 6610
 account_response = account.read()
 account_id = None
 if len(account_response) > 0:  # item exists
-    account_id = account_response[0].get("id")  # get item id
+    account_id = account_response[0].get("id")  # get account id, will be used in order line
 
 # create sales order
 
@@ -158,7 +158,7 @@ else:  # no order with specified external document No. exists
     so.filter_text = f"externalDocumentNumber eq '{ext_doc_no}'"
     response_list = so.read()  # looking for Sales Order with known external doc no
     if len(response_list) > 0:
-        so_number = response_list[0].get("number")  # get just created order No.
+        so_number = response_list[0].get("number")  # get just created order No. - later will use it to find invoice
         so_id = response_list[0].get("id") # SO id we need later for lines edit
 print("SO No", so_number)
 
@@ -266,3 +266,30 @@ else:
 sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
 print(f"SO has {len(response_list)} lines after deleted one")  # number of lines in the document
+
+# execute action - order ship and invoice
+# http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice
+if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
+    url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice"
+else:
+    raise Exception('Critical error - Can not find document')
+
+response_list = so.exe() #  execute sales order action "ship and invoice"
+
+response_list = sol.delete()  # update line in parameters new info dic
+if (len(response_list) > 0) and sol.except_error is None:
+    print("Sales order is shipped and invoiced; response is ", response_list)
+else:
+    raise Exception(sol.except_error)
+
+# find just created invoice by "orderNumber"= so_number
+url_salesInvoices = "http://bs16:7048/BC/api/v1.0/salesInvoices"
+si = Connect(url_salesInvoices, (user, psw), {"Accept-Language": "en-us"})
+si.filter_text = f"orderNumber eq {so_number}"
+
+response_list = si.read()
+
+if (len(response_list) > 0) and si.except_error is None:
+    print("Sales Invoice is: \n", response_list)
+else:
+    raise Exception(si.except_error)
