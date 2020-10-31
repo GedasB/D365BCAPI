@@ -1,8 +1,8 @@
-
 from D365BCAPI.D365BC16API import Connect
 
 """
-This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects API v1.0 pages.
+This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects 
+API v1.0 pages.
 Existing API pages can be get http://{server}:{port}/{tenant}/api/v1.0/
 metadata can be get http://{server}:{port}/{tenant}/api/v1.0/$metadata
 Flow is:
@@ -20,7 +20,7 @@ user = psw = "a"  # basic authentication
 
 # customers
 url_customers = "http://bs16:7048/BC/api/v1.0/customers"  # page 5471
-custname = 'Cronus'  # begining of customer name
+custname = 'Cronus'  # begin of customer name
 
 # create connection object: url, basic authentication, headers recommended by MS
 customers = Connect(url_customers, (user, psw), {"Accept-Language": "en-us"})
@@ -101,7 +101,7 @@ new_order = {
     "status": "Draft",
     "phoneNumber": "370 698 13123",
     "email": "liber.town@contoso.com",
-    "shippingPostalAddress": { # Changing shipping address just for fun
+    "shippingPostalAddress": {  # Changing shipping address just for fun
         "street": "Another Str. 77",
         "city": "Hamburg",
         "state": "",
@@ -147,10 +147,10 @@ response_list = so.read()  # looking for Sales Order with known external doc no
 
 if len(response_list) > 0:  # order exists and we take order id
     so_number = response_list[0].get("number")  # get order No. just for fun - it is not used in further actions
-    so_id = response_list[0].get("id") # SO id we need later for lines edit
+    so_id = response_list[0].get("id")  # SO id we need later for lines edit
 else:  # no order with specified external document No. exists
     response_list = so.insert(new_order)  # create new order with specified external doc no
-    if (len(response_list) > 0) and so.except_error is None :
+    if (len(response_list) > 0) and so.except_error is None:
         print("Sales order is created", response_list)  # [201, 'Created'] if everything is OK
     else:
         raise Exception(so.except_error)
@@ -159,7 +159,7 @@ else:  # no order with specified external document No. exists
     response_list = so.read()  # looking for Sales Order with known external doc no
     if len(response_list) > 0:
         so_number = response_list[0].get("number")  # get just created order No. - later will use it to find invoice
-        so_id = response_list[0].get("id") # SO id we need later for lines edit
+        so_id = response_list[0].get("id")  # SO id we need later for lines edit
 print("SO No", so_number)
 
 # created order lines management
@@ -187,7 +187,7 @@ line_insert = {
 }
 response_list = sol.insert(line_insert)  # insert line
 if (len(response_list) > 0) and sol.except_error is None:
-    print("Added line 35000: Item - 1996-S", response_list) # [201, 'Created'] if everything is OK
+    print("Added line 35000: Item - 1996-S", response_list)  # [201, 'Created'] if everything is OK
 else:
     raise Exception(sol.except_error)
 
@@ -200,7 +200,7 @@ line_insert = {
 }
 response_list = sol.insert(line_insert)  # insert fake line
 if (len(response_list) > 0) and sol.except_error is None:
-    print("Added line 37500: Item - '2000-S'", response_list) # [201, 'Created'] if everything is OK
+    print("Added line 37500: Item - '2000-S'", response_list)  # [201, 'Created'] if everything is OK
 else:
     raise Exception(sol.except_error)
 
@@ -218,7 +218,7 @@ sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 30
 
 response_list = sol.read()  # get line from document; line No is 30000
 if (len(response_list) > 0) and sol.except_error is None:
-    line_id = response_list[0].get('id') #  get line id
+    line_id = response_list[0].get('id')  # get line id
     print(f"Line id is {line_id}")
     print("description before update is", response_list[0].get("description"))
 else:
@@ -226,10 +226,10 @@ else:
 
 # modify exiting line: it is line no 30000
 line_update = {"description": "This is updated Comments line"}  # new info to update line
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')" #  adding line_id to url
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to url
 sol.filter_text = ''
 #  for beta api document key was document id and sequence
-#sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+# sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.modify(line_update)  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
     print("Modified line 30000 description now is 'This is updated Comments line'", response_list)
@@ -254,8 +254,8 @@ if (len(response_list) > 0) and sol.except_error is None:
 else:
     raise Exception(sol.except_error)
 
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')" #  adding line_id to URL
-sol.filter_text = '' #  remove any filters
+sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to URL
+sol.filter_text = ''  # remove any filters
 response_list = sol.delete()  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
     print("Deleted fake line 37500", response_list)
@@ -274,7 +274,7 @@ if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
 else:
     raise Exception('Critical error - Can not find document')
 
-response_list = so.exe() #  execute sales order action "ship and invoice"
+response_list = so.exe()  # execute sales order action "ship and invoice"
 
 response_list = sol.delete()  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
@@ -290,6 +290,11 @@ si.filter_text = f"orderNumber eq {so_number}"
 response_list = si.read()
 
 if (len(response_list) > 0) and si.except_error is None:
-    print("Sales Invoice is: \n", response_list)
+    si_number = response_list[0].get('number')
+    si_status = response_list[0].get('status')
+    si_totalAmount = response_list[0].get('totalAmountIncludingTax')
+    si_remainingAmount = response_list[0].get('remainingAmount')
+    print(f'Sales Invoice {si_number} is created \n Total Amount {si_totalAmount} \n '
+          f'Remaining Amount {si_remainingAmount}')
 else:
     raise Exception(si.except_error)
