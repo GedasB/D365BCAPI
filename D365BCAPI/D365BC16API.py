@@ -109,7 +109,7 @@ class Connect(object):
 
         return [response.status_code, response.reason]  # 201 - Created
 
-    def exe(self, json_body):
+    def exe(self, json_body = None):
         """
         executes action set in URL;
         endpoint url can be changed before insert;

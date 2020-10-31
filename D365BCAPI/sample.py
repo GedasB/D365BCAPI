@@ -269,18 +269,16 @@ print(f"SO has {len(response_list)} lines after deleted one")  # number of lines
 
 # execute action - order ship and invoice
 # http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice
-if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
-    url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice"
+if len(so_id) > 0:  # if doc id not blank (we found it earlier)then we can ship and invoice it
+    url_so = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice"  # create URL
 else:
     raise Exception('Critical error - Can not find document')
 
 response_list = so.exe()  # execute sales order action "ship and invoice"
-
-response_list = sol.delete()  # update line in parameters new info dic
-if (len(response_list) > 0) and sol.except_error is None:
+if (len(response_list) > 0) and so.except_error is None:
     print("Sales order is shipped and invoiced; response is ", response_list)
 else:
-    raise Exception(sol.except_error)
+    raise Exception(so.except_error)
 
 # find just created invoice by "orderNumber"= so_number
 url_salesInvoices = "http://bs16:7048/BC/api/v1.0/salesInvoices"
