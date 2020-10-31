@@ -289,7 +289,6 @@ response_list = si.read()
 
 if (len(response_list) > 0) and si.except_error is None:
     si_number = response_list[0].get('number')
-    si_status = response_list[0].get('status')
     si_totalAmount = response_list[0].get('totalAmountIncludingTax')
     si_remainingAmount = response_list[0].get('remainingAmount')
     print(f'Sales Invoice {si_number} is created \n Total Amount {si_totalAmount} \n '

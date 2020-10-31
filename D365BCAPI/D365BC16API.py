@@ -71,7 +71,7 @@ class Connect(object):
             return []
 
         self.filter_text = None  # remove filter after call
-        response_dict = response.json()  # dict
+        response_dict = response.json  # dict
 
         value_list = response_dict.get("value")  # list return
         if value_list and len(value_list) >= 1:  # if dict has key "value" then data are list
