@@ -71,8 +71,7 @@ class Connect(object):
             return []
 
         self.filter_text = None  # remove filter after call
-        response_dict = response.json  # dict
-
+        response_dict = response.json()  # dict
         value_list = response_dict.get("value")  # list return
         if value_list and len(value_list) >= 1:  # if dict has key "value" then data are list
             value_dict = value_list[0]  # dict
@@ -113,19 +112,15 @@ class Connect(object):
         """
         executes action set in URL;
         endpoint url can be changed before insert;
-        :param: json_body: dictionary(json) includes required parameters. it could be blank
+        :param: json_body: dictionary(json) includes required parameters (if any). it could be blank
         :return:
         """
-        response = self.read()  # just to get etag value
-        if self.except_error:  # failed read connection
-            return [self.except_error]
-
-        if len(response) == 0 or self._etag == "":  # read response found no records to update
-            return []
-
-        self._headers["If-Match"] = self._etag
 
         response = requests.post(self.url, auth=self._auth, headers=self._headers, json=json_body)
+
+        if response.status_code != 204:  # failed
+            self.except_error = [response.status_code, response.reason]
+            return []
 
         return [response.status_code, response.reason]  # [204, No Content] is OK
 

@@ -19,7 +19,7 @@ Flow is:
 user = psw = "a"  # basic authentication
 
 # customers
-url_customers = "http://bs16:7048/BC/api/v1.0/customers"  # page 5471
+url_customers = "http://bs17:7048/BC/api/v1.0/customers"  # page 5471
 custname = 'Cronus'  # begin of customer name
 
 # create connection object: url, basic authentication, headers recommended by MS
@@ -60,7 +60,7 @@ else:  # create customer if not found
 print("Sales order Customer No", custno)
 
 # find item and itemId - it requires for sales document lines creation
-url_item = "http://bs16:7048/BC/api/v1.0/items"  # page 5470
+url_item = "http://bs17:7048/BC/api/v1.0/items"  # page 5470
 
 item = Connect(url_item, (user, psw), {"Accept-Language": "en-us"})
 item.filter_text = "number eq '1996-S'"
@@ -76,7 +76,7 @@ if len(item_response) > 0:  # customer exists
     item_2_id = item_response[0].get("id")  # get item2 id
 
 # find g/l account and itemId - it requires for sales document lines
-url_account = "http://bs16:7048/BC/api/v1.0/accounts"  # page 5470
+url_account = "http://bs17:7048/BC/api/v1.0/accounts"  # page 5470
 
 account = Connect(url_account, (user, psw), {"Accept-Language": "en-us"})
 account.filter_text = "number eq '6610'"  # g/l account no is 6610
@@ -88,7 +88,7 @@ if len(account_response) > 0:  # item exists
 # create sales order
 
 # new order dictionary NAV page 5495 and lines NAV page 5496
-ext_doc_no = "FDA 17596"  # Only by external document no we can find sales order,
+ext_doc_no = "FDA 17597"  # Only by external document no we can find sales order,
 # as for document no is used No. Series
 new_order = {
     "externalDocumentNumber": ext_doc_no,  # this is number we'll search created document and get it No.
@@ -140,7 +140,7 @@ new_order = {
     ]
 }
 
-url_so = "http://bs16:7048/BC/api/v1.0/salesOrders"  # NAV page 5495
+url_so = "http://bs17:7048/BC/api/v1.0/salesOrders"  # NAV page 5495
 so = Connect(url_so, (user, psw), {"Accept-Language": "en-us"})  # create sales order header object
 so.filter_text = f"externalDocumentNumber eq '{ext_doc_no}'"
 response_list = so.read()  # looking for Sales Order with known external doc no
@@ -165,7 +165,7 @@ print("SO No", so_number)
 # created order lines management
 # we need sales order document_id to add it to endpoint url for record editing
 if len(so_id) > 0:  # if doc id exists then we go to read lines of this doc
-    url_sol = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+    url_sol = f"http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 else:
     raise Exception('Critical error - Can not find document')
 
@@ -205,7 +205,7 @@ else:
     raise Exception(sol.except_error)
 
 # count lines
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
 if (len(response_list) > 0) and sol.except_error is None:
     print(f"SO has {len(response_list)} lines after added 2")  # number of lines in the document
@@ -226,10 +226,10 @@ else:
 
 # modify exiting line: it is line no 30000
 line_update = {"description": "This is updated Comments line"}  # new info to update line
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to url
+sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to url
 sol.filter_text = ''
 #  for beta api document key was document id and sequence
-# sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+# sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 response_list = sol.modify(line_update)  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
     print("Modified line 30000 description now is 'This is updated Comments line'", response_list)
@@ -239,12 +239,12 @@ else:
 # delete line
 line_no = 37500  # line No (sequence in response json)
 # in API beta order line url includes document id and line no (line primary key)
-# sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
+# sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrderLines({so_id},{line_no})"
 ##
 # in API v1.0 we need to find sales line id and identify it by id
 # we looking for line with sequence 37500
 
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 sol.filter_text = f"sequence eq {line_no}"  # add filter ?$filter=sequence eq 37500
 
 response_list = sol.read()  # get line with filtered sequence 37500
@@ -254,7 +254,7 @@ if (len(response_list) > 0) and sol.except_error is None:
 else:
     raise Exception(sol.except_error)
 
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to URL
+sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrderLines('{line_id}')"  # adding line_id to URL
 sol.filter_text = ''  # remove any filters
 response_list = sol.delete()  # update line in parameters new info dic
 if (len(response_list) > 0) and sol.except_error is None:
@@ -263,14 +263,14 @@ else:
     raise Exception(sol.except_error)
 
 # count lines
-sol.url = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
+sol.url = f"http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/salesOrderLines"
 response_list = sol.read()  # read all lines just for fun
 print(f"SO has {len(response_list)} lines after deleted one")  # number of lines in the document
 
 # execute action - order ship and invoice
-# http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice
+# http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice
 if len(so_id) > 0:  # if doc id not blank (we found it earlier)then we can ship and invoice it
-    url_so = f"http://bs16:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice"  # create URL
+    so.url = f"http://bs17:7048/BC/api/v1.0/salesOrders({so_id})/Microsoft.NAV.shipAndInvoice"  # create URL
 else:
     raise Exception('Critical error - Can not find document')
 
@@ -281,9 +281,10 @@ else:
     raise Exception(so.except_error)
 
 # find just created invoice by "orderNumber"= so_number
-url_salesInvoices = "http://bs16:7048/BC/api/v1.0/salesInvoices"
+url_salesInvoices = "http://bs17:7048/BC/api/v1.0/salesInvoices"
 si = Connect(url_salesInvoices, (user, psw), {"Accept-Language": "en-us"})
-si.filter_text = f"orderNumber eq {so_number}"
+so_number = '1001'
+si.filter_text = f"orderNumber eq '{so_number}'"
 
 response_list = si.read()
 
