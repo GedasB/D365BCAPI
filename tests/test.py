@@ -5,7 +5,7 @@ import json
 class D365BCAPITestCase(TestCase):
 
     def test_read_OK(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             r = Connect('http://test.lt/test', auth={'a':'a'}, headers= {'some headers'})
             r.filter_text = "aa eq bb"
@@ -17,7 +17,7 @@ class D365BCAPITestCase(TestCase):
                                               auth={'a':'a'}, headers= {'some headers'})
 
     def test_read_Fail(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             mocked_req.get.return_value.status_code = 400 #  Check if return error
             mocked_req.get.return_value.reason = 'Any error reason' #  error message
@@ -28,7 +28,7 @@ class D365BCAPITestCase(TestCase):
                                                                         'must to include error code and reason')
 
     def test_insert_OK(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.post.return_value.status_code = 201
             mocked_req.post.return_value.reason = 'Created'
             ins = Connect('http://test.lt/test', auth={'a':'a'}, headers= {'some headers'})
@@ -38,7 +38,7 @@ class D365BCAPITestCase(TestCase):
             self.assertEqual(respo, [201, 'Created'], 'insert: no error returns [201, Created] ') #  without error
 
     def test_insert_FAIL(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             #  any error
             mocked_req.post.return_value.status_code = 400
             mocked_req.post.return_value.reason = 'Any error reason' #  error message
@@ -49,7 +49,7 @@ class D365BCAPITestCase(TestCase):
                                                                         'must to include error code and reason')
 
     def test_delete_OK(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             mocked_req.delete.return_value.status_code = 204
             mocked_req.delete.return_value.reason = 'OK'
@@ -61,7 +61,7 @@ class D365BCAPITestCase(TestCase):
 
             #  any error
     def test_delete_FAIL(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             mocked_req.delete.return_value.status_code = 400
             mocked_req.delete.return_value.reason = 'Any error reason' #  error message
@@ -72,7 +72,7 @@ class D365BCAPITestCase(TestCase):
                                                                         'must to include error code and reason')
 
     def test_modify_OK(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             mocked_req.patch.return_value.status_code = 200
             mocked_req.patch.return_value.reason = 'OK'
@@ -84,7 +84,7 @@ class D365BCAPITestCase(TestCase):
 
             #  any error
     def test_modify_FAIL(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.get.return_value.status_code = 200
             mocked_req.patch.return_value.status_code = 400
             mocked_req.patch.return_value.reason = 'Any error reason' #  error message
@@ -95,7 +95,7 @@ class D365BCAPITestCase(TestCase):
                                                                         'must to include error code and reason')
 
     def test_exe_OK(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.post.return_value.status_code = 204
             mocked_req.post.return_value.reason = 'No content'
             ex = Connect('http://test.lt/test(123456789abcd)/NAV.Action', auth={'a':'a'}, headers= {'some headers'})
@@ -106,7 +106,7 @@ class D365BCAPITestCase(TestCase):
 
             #  any error
     def test_exe_FAIL(self):
-        with mock.patch('D365BCAPI.D365BC16API.requests') as mocked_req:
+        with mock.patch('D365BCAPI.D365BCv1API.requests') as mocked_req:
             mocked_req.post.return_value.status_code = 400
             mocked_req.post.return_value.reason = 'Any error reason' #  error message
             ex = Connect('http://test.lt/test(123456789abcd)/NAV.Action', auth={'a':'a'}, headers= {'some headers'})
