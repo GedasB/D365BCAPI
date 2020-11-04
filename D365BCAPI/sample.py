@@ -88,7 +88,7 @@ if len(account_response) > 0:  # item exists
 # create sales order
 
 # new order dictionary NAV page 5495 and lines NAV page 5496
-ext_doc_no = "FDA 17597"  # Only by external document no we can find sales order,
+ext_doc_no = "FDA 17598"  # Only by external document no we can find sales order,
 # as for document no is used No. Series
 new_order = {
     "externalDocumentNumber": ext_doc_no,  # this is number we'll search created document and get it No.
@@ -296,3 +296,24 @@ if (len(response_list) > 0) and si.except_error is None:
           f'Remaining Amount {si_remainingAmount}')
 else:
     raise Exception(si.except_error)
+
+
+#Response from execution sample is
+# Read customers Cronus Cardoxy Procurement
+# Sales order Customer No IC1030
+# Sales order is created [201, 'Created']
+# SO No 1004
+# SO has 4 lines
+# Added line 35000: Item - 1996-S [201, 'Created']
+# Added line 37500: Item - '2000-S' [201, 'Created']
+# SO has 6 lines after added 2
+# Line id is 2043b1e7-811e-eb11-b334-ef426b246304-30000
+# description before update is This is Comments line
+# Modified line 30000 description now is 'This is updated Comments line' [200, 'OK']
+# Line 3750 id is  2043b1e7-811e-eb11-b334-ef426b246304-37500
+# Deleted fake line 37500 [204, 'No Content']
+# SO has 5 lines after deleted one
+# Sales order is shipped and invoiced; response is  [204, 'No Content']
+# Sales Invoice 103032 is created
+#  Total Amount 3531.3
+#  Remaining Amount 3531.3

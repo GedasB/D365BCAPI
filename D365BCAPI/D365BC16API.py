@@ -115,7 +115,7 @@ class Connect(object):
         :param: json_body: dictionary(json) includes required parameters (if any). it could be blank
         :return:
         """
-
+        #self._headers["If-Match"] = self._etag
         response = requests.post(self.url, auth=self._auth, headers=self._headers, json=json_body)
 
         if response.status_code != 204:  # failed
@@ -140,9 +140,14 @@ class Connect(object):
         if len(response) == 0 or self._etag == "":  # read response found no records to update
             return []
 
-        self._headers["If-Match"] = self._etag
+        if type(self._etag) == type('str'):
+            self._headers["If-Match"] = self._etag
 
         response = requests.patch(self.url, auth=self._auth, headers=self._headers, json=json_body)
+
+        if response.status_code != 200:  # failed
+            self.except_error = [response.status_code, response.reason]
+            return []
 
         return [response.status_code, response.reason]  # 200 OK
 
@@ -162,7 +167,11 @@ class Connect(object):
         if len(response) == 0 or self._etag == "":  # read response found no records to delete
             return []
 
-        self._headers["If-Match"] = self._etag
+        if type(self._etag) == type('str'):
+            self._headers["If-Match"] = self._etag
 
         response = requests.delete(self.url, auth=self._auth, headers=self._headers)
+        if response.status_code != 204:  # failed
+            self.except_error = [response.status_code, response.reason]
+            return []
         return [response.status_code, response.reason]  # 204, OK
