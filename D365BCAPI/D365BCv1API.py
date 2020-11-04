@@ -1,6 +1,6 @@
 """
-This connector simplifies http connection from Python to Microsoft Dynamics 365 Business Central platform 16.xx API
-by providing 5 methods: insert, read, modify, delete (CRUD) and exe for action execution___________________
+This connector simplifies http connection from Python to Microsoft Dynamics 365 Business Central platform 16.xx 17.xx
+version v1.0 API by providing 5 methods: insert, read, modify, delete (CRUD) and exe for action execution
 Dynamics 365 Business Central API documentation:
 https://docs.microsoft.com/en-us/dynamics-nav/api-reference/v1.0/
 
@@ -108,14 +108,14 @@ class Connect(object):
 
         return [response.status_code, response.reason]  # 201 - Created
 
-    def exe(self, json_body = None):
+    def exe(self, json_body=None):
         """
         executes action set in URL;
         endpoint url can be changed before insert;
         :param: json_body: dictionary(json) includes required parameters (if any). it could be blank
         :return:
         """
-        #self._headers["If-Match"] = self._etag
+        # self._headers["If-Match"] = self._etag
         response = requests.post(self.url, auth=self._auth, headers=self._headers, json=json_body)
 
         if response.status_code != 204:  # failed
@@ -140,7 +140,7 @@ class Connect(object):
         if len(response) == 0 or self._etag == "":  # read response found no records to update
             return []
 
-        if type(self._etag) == type('str'):
+        if isinstance(self._etag, str):
             self._headers["If-Match"] = self._etag
 
         response = requests.patch(self.url, auth=self._auth, headers=self._headers, json=json_body)
@@ -167,7 +167,7 @@ class Connect(object):
         if len(response) == 0 or self._etag == "":  # read response found no records to delete
             return []
 
-        if type(self._etag) == type('str'):
+        if isinstance(self._etag, str):
             self._headers["If-Match"] = self._etag
 
         response = requests.delete(self.url, auth=self._auth, headers=self._headers)

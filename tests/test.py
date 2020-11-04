@@ -1,4 +1,4 @@
-from D365BCAPI.D365BC16API import Connect
+from D365BCAPI.D365BCv1API import Connect
 from unittest import TestCase, mock
 import json
 

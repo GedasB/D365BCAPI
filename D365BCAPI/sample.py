@@ -1,4 +1,4 @@
-from D365BCAPI.D365BC16API import Connect
+from D365BCAPI.D365BCv1API import Connect
 
 """
 This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects 
