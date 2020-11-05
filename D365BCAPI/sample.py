@@ -1,19 +1,21 @@
 from D365BCAPI.D365BCv1API import Connect
 
 """
-This is sample usage of D365BC16API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects 
+This is sample usage of D365BCv1API. Used standard Dynamics 365 Business Central platform 16.xx(17.xx) objects 
 API v1.0 pages.
 Existing API pages can be get http://{server}:{port}/{tenant}/api/v1.0/
 metadata can be get http://{server}:{port}/{tenant}/api/v1.0/$metadata
-Flow is:
+Sample flow is:
 1. Looking for customer name starting by "Cronus". If do not exists - create. "Recordset read & record create" example
-2. Looking for items '1996-S' '2000-S' and g/l account '2340'. Get it id - requires for sales order creation.
+2. Looking for items '1996-S' '2000-S' and g/l account '6610'. Get it id - requires for sales order creation.
  "Get field value" example
 3. Create sales order with 4 lines: 2 item lines, g/l account line, comment line. Get created sales order documentid.
   Few related "records creation" example 
 4. Add 2 more lines to the existing order. "Add lines to existing order" example.
 5. Modify description in comment line in existing order. "Modify existing line" example
 6. Delete one line from existing order. "Record delete" example
+7. Execute action Microsoft.NAV.shipAndInvoice on just created sales order. "Execute action" example
+8. Check is invoice created and what are Total Amount and Remaining Amount in it.
 """
 
 user = psw = "a"  # basic authentication
@@ -297,8 +299,7 @@ if (len(response_list) > 0) and si.except_error is None:
 else:
     raise Exception(si.except_error)
 
-
-#Response from execution sample is
+# Response from execution sample is
 # Read customers Cronus Cardoxy Procurement
 # Sales order Customer No IC1030
 # Sales order is created [201, 'Created']

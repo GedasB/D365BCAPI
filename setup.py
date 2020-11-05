@@ -1,11 +1,11 @@
 import setuptools
 
-with open("../README.md", "r") as fh:
+with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="D365BCAPI-GEDASB", # Replace with your own username
-    version="0.0.1",
+    version="0.0.1b1",
     author="Gedas B",
     author_email="gedasb@outlook.com",
     description="Dynamics 365 Business Central API connector",
@@ -19,4 +19,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.6',
+    keywords='Microsoft Dynamics 365 Business Central NAV API ',
 )

@@ -1,0 +1,5 @@
+/venv/**
+/build/**
+/D365BCAPI_GEDASB.egg-info/**
+/GEDASB.egg-info/**
+/dist/**
