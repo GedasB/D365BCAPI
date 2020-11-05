@@ -15,7 +15,7 @@ Filters rules for API endpoint are described [here](https://docs.microsoft.com/e
 - metadata can be get: http://{server}:{port}/{tenant}/api/v1.0/$metadata;
 - sample metadata.xml files for *beta* and for *v1.0* are included in project
 
-Connector uses python *request* module
+Connector uses python [requests](https://requests.readthedocs.io/en/master/) module
 
 # Connector Flow
 1. Create connector *object = connect(url,url, auth, headers)*
@@ -56,7 +56,7 @@ Connector uses python *request* module
     * response is API response to action. If record deleted then response is list [204, No Content]. 
     if response is blank then check *object.except_error* value  
 6. Exe action by execute *object.exe()*
-    * url must to include action name for example *http://.../api/v1.0/salesOrders(36183a-f8c8-ea11-9954-ff17e652b3c3)/Microsoft.NAV.shipAndInvoice*.  If action is bounded then url must include bound parameter like documentId.
+    * url must to include action name for example *http://.../api/v1.0/salesOrders(36183a-f8c8-ea11-9954-ff17e652b3c3)/Microsoft.NAV.shipAndInvoice*.  If action is bounded then url must to include bound parameter like documentId.
     For unbound actions most probably parameters need to be provided in json.
     * json body can be blank (None) if bound parameters are not required.
     * response is API response to action. If action executed then response is list [204, No Content]. 
