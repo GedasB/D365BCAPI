@@ -20,4 +20,5 @@ setuptools.setup(
     ],
     python_requires='>=3.6',
     keywords='Microsoft Dynamics 365 Business Central NAV API ',
+    install_requires=['requests'],
 )

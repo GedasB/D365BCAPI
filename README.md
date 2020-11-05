@@ -57,7 +57,7 @@ Connector uses python [requests](https://requests.readthedocs.io/en/master/) mod
     if response is blank then check *object.except_error* value  
 6. Exe action by execute *object.exe()*
     * url must to include action name for example *http://.../api/v1.0/salesOrders(36183a-f8c8-ea11-9954-ff17e652b3c3)/Microsoft.NAV.shipAndInvoice*.  If action is bounded then url must to include bound parameter like documentId.
-    For unbound actions most probably parameters need to be provided in json.
+    For unbounded actions most probably parameters need to be provided in json.
     * json body can be blank (None) if bound parameters are not required.
     * response is API response to action. If action executed then response is list [204, No Content]. 
     if response is blank then check *object.except_error* value            
